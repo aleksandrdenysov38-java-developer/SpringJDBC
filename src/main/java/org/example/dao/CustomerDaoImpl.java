@@ -3,29 +3,49 @@ package org.example.dao;
 import org.example.mapper.CustomerRowMapper;
 import org.example.model.Customer;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-public class CustomerDaoImpl implements CustomerDao {
+@Repository
+public class CustomerDaoImpl
+        implements CustomerDao {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public CustomerDaoImpl(JdbcTemplate jdbcTemplate) {
+    private final CustomerRowMapper rowMapper;
+
+    public CustomerDaoImpl(
+            JdbcTemplate jdbcTemplate,
+            CustomerRowMapper rowMapper) {
+
         this.jdbcTemplate = jdbcTemplate;
+        this.rowMapper = rowMapper;
     }
 
     @Override
-    public void save(Customer customer) {
+    public Customer save(Customer customer) {
 
         String sql =
-                "INSERT INTO customer(full_name,email,social_security_number) VALUES(?,?,?)";
+                """
+                INSERT INTO customer
+                (full_name,email,social_security_number)
+                VALUES (?,?,?)
+                RETURNING id
+                """;
 
-        jdbcTemplate.update(
-                sql,
-                customer.getFullName(),
-                customer.getEmail(),
-                customer.getSocialSecurityNumber()
-        );
+        Long generatedId =
+                jdbcTemplate.queryForObject(
+                        sql,
+                        Long.class,
+                        customer.getFullName(),
+                        customer.getEmail(),
+                        customer.getSocialSecurityNumber()
+                );
+
+        customer.setId(generatedId);
+
+        return customer;
     }
 
     @Override
@@ -36,7 +56,7 @@ public class CustomerDaoImpl implements CustomerDao {
 
         return jdbcTemplate.queryForObject(
                 sql,
-                new CustomerRowMapper(),
+                rowMapper,
                 id
         );
     }
@@ -49,7 +69,7 @@ public class CustomerDaoImpl implements CustomerDao {
 
         return jdbcTemplate.query(
                 sql,
-                new CustomerRowMapper()
+                rowMapper
         );
     }
 
@@ -57,9 +77,13 @@ public class CustomerDaoImpl implements CustomerDao {
     public void update(Customer customer) {
 
         String sql =
-                "UPDATE customer " +
-                        "SET full_name=?, email=?, social_security_number=? " +
-                        "WHERE id=?";
+                """
+                UPDATE customer
+                SET full_name=?,
+                    email=?,
+                    social_security_number=?
+                WHERE id=?
+                """;
 
         jdbcTemplate.update(
                 sql,

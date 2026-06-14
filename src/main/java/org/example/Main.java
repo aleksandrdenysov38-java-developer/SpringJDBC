@@ -26,36 +26,35 @@ public class Main {
                         "123456789"
                 );
 
-        customerDao.save(customer);
+        customer = customerDao.save(customer);
+
+        System.out.println(
+                "Generated ID = "
+                        + customer.getId()
+        );
+
+        Customer found =
+                customerDao.findById(
+                        customer.getId()
+                );
+
+        System.out.println(found);
+
+        found.setFullName(
+                "Updated John Smith"
+        );
+
+        customerDao.update(found);
 
         List<Customer> customers =
                 customerDao.findAll();
 
-        System.out.println("ALL CUSTOMERS:");
-
-        customers.forEach(System.out::println);
-
-        Customer found =
-                customerDao.findById(1L);
-
-        System.out.println("\nFOUND:");
-
-        System.out.println(found);
-
-        found.setFullName("Updated John");
-
-        customerDao.update(found);
-
-        System.out.println("\nAFTER UPDATE:");
-
-        System.out.println(
-                customerDao.findById(1L)
+        customers.forEach(
+                System.out::println
         );
 
-        customerDao.delete(1L);
-
-        System.out.println(
-                "\nCUSTOMER DELETED"
+        customerDao.delete(
+                customer.getId()
         );
 
         context.close();

@@ -3,8 +3,11 @@ package org.example.model;
 public class Customer {
 
     private Long id;
+
     private String fullName;
+
     private String email;
+
     private String socialSecurityNumber;
 
     public Customer() {
@@ -14,6 +17,7 @@ public class Customer {
                     String fullName,
                     String email,
                     String socialSecurityNumber) {
+
         this.id = id;
         this.fullName = fullName;
         this.email = email;
